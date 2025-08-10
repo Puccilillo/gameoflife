@@ -44,17 +44,11 @@ function resizeCanvas() {
     height = canvas.height;
 }
 
-function updateSpeedLabel() {
-    speedLabel.textContent = `Delay: ${delay} ms`;
-}
+function updateSpeedLabel() { speedLabel.textContent = `Delay: ${delay} ms`; }
 
-function cellKey(x, y) {
-    return `${x},${y}`;
-}
+function cellKey(x, y) { return `${x},${y}`; }
 
-function parseKey(k) {
-    return k.split(',').map(Number);
-}
+function parseKey(k) { return k.split(',').map(Number); }
 
 function initGlider(x, y) {
     let coords = [
@@ -96,11 +90,8 @@ function nextGen() {
         let alive = aliveCells.has(key);
         let neighbors = getNeighbors(x, y);
 
-        if (alive && (neighbors === 2 || neighbors === 3)) {
-            newAlive.add(key);
-        } else if (!alive && neighbors === 3) {
-            newAlive.add(key);
-        }
+        if (alive && (neighbors === 2 || neighbors === 3)) { newAlive.add(key); } 
+        else if (!alive && neighbors === 3) { newAlive.add(key); }
     });
 
     aliveCells = newAlive;
@@ -120,9 +111,10 @@ function drawGrid() {
     });
 
     // Draw FPS in top-left
-    ctx.fillStyle = 'white';
-    ctx.font = '16px monospace';
-    ctx.fillText(`FPS: ${fps}`, 10, 20);
+    ctx.fillStyle = 'rgb(255,173,0)';
+    ctx.font = '10px monospace';
+    ctx.fillText(`FPS: ${fps}`, 10, 12);
+    ctx.fillText(`CELLS: ${aliveCells.size}`, 10, 24);
 }
 
 function loop(timestamp) {
