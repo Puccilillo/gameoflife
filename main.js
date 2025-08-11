@@ -39,7 +39,7 @@ let framesThisSecond = 0;
 /* ====================================== Functions ====================================== */
 function resizeCanvas() {
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - 55;
+    canvas.height = window.innerHeight - 30;
     width = canvas.width;
     height = canvas.height;
 }
