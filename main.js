@@ -170,30 +170,17 @@ const handlers = {
         }
     },
     onClick(e) {
-        if (isDragging || !paused) return;
+        if (isDragging) return;
         let rect = canvas.getBoundingClientRect();
         let mx = e.clientX - rect.left;
         let my = e.clientY - rect.top;
         let wx = Math.floor(cameraX + mx / zoom);
         let wy = Math.floor(cameraY + my / zoom);
 
-        // Add a 100*100 square of alive cells
-        for (let x = wx - 50; x <= wx + 50; x++) {
-            for (let y = wy - 50; y <= wy + 50; y++) {
-                let key = cellKey(x, y);
-                let alive = Math.floor(Math.random() * 2)
-                if (alive) { aliveCells.add(key) } else {
-                    if (aliveCells.has(key)) aliveCells.delete(key)
-                }
-            }
-        }
-
-        /*
         // Change a single cell state
         let key = cellKey(wx, wy);
         if (aliveCells.has(key)) aliveCells.delete(key);
         else aliveCells.add(key);
-        */
 
         drawGrid();
     },
