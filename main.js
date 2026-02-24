@@ -31,6 +31,10 @@ const speedDownBtn = document.getElementById('speed-down');
 let isDragging = false;
 let dragStartX, dragStartY;
 
+// Mouse position tracking
+let lastMouseX = 0;
+let lastMouseY = 0;
+
 // FPS tracking variables
 let fps = 0;
 let lastFpsUpdate = 0;
@@ -56,6 +60,68 @@ function initGlider(x, y) {
         [x + 1, y + 2], [x + 2, y + 2]
     ];
     coords.forEach(([cx, cy]) => aliveCells.add(cellKey(cx, cy)));
+}
+
+// Pattern definitions for keyboard shortcuts
+const patterns = {
+    // 1: Glider (moves diagonally)
+    '1': [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]],
+    
+    // 2: Blinker (period 2 oscillator)
+    '2': [[0, 0], [1, 0], [2, 0]],
+    
+    // 3: Toad (period 2 oscillator)
+    '3': [[1, 0], [2, 0], [3, 0], [0, 1], [1, 1], [2, 1]],
+    
+    // 4: Beacon (period 2 oscillator)
+    '4': [[0, 0], [1, 0], [0, 1], [2, 3], [3, 3], [3, 2]],
+    
+    // 5: Lightweight Spaceship (LWSS)
+    '5': [[1, 0], [4, 0], [0, 1], [0, 2], [4, 2], [0, 3], [1, 3], [2, 3], [3, 3]],
+    
+    // 6: Pulsar (period 3 oscillator)
+    '6': [
+        [2, 0], [3, 0], [4, 0], [8, 0], [9, 0], [10, 0],
+        [0, 2], [5, 2], [7, 2], [12, 2],
+        [0, 3], [5, 3], [7, 3], [12, 3],
+        [0, 4], [5, 4], [7, 4], [12, 4],
+        [2, 5], [3, 5], [4, 5], [8, 5], [9, 5], [10, 5],
+        [2, 7], [3, 7], [4, 7], [8, 7], [9, 7], [10, 7],
+        [0, 8], [5, 8], [7, 8], [12, 8],
+        [0, 9], [5, 9], [7, 9], [12, 9],
+        [0, 10], [5, 10], [7, 10], [12, 10],
+        [2, 12], [3, 12], [4, 12], [8, 12], [9, 12], [10, 12]
+    ],
+    
+    // 7: Gosper Glider Gun (creates gliders)
+    '7': [
+        [0, 4], [0, 5], [1, 4], [1, 5],
+        [10, 4], [10, 5], [10, 6], [11, 3], [11, 7], [12, 2], [12, 8],
+        [13, 2], [13, 8], [14, 5], [15, 3], [15, 7], [16, 4], [16, 5], [16, 6], [17, 5],
+        [20, 2], [20, 3], [20, 4], [21, 2], [21, 3], [21, 4], [22, 1], [22, 5],
+        [24, 0], [24, 1], [24, 5], [24, 6],
+        [34, 2], [34, 3], [35, 2], [35, 3]
+    ],
+    
+    // 8: Block (still life)
+    '8': [[0, 0], [1, 0], [0, 1], [1, 1]],
+    
+    // 9: Beehive (still life)
+    '9': [[1, 0], [2, 0], [0, 1], [3, 1], [1, 2], [2, 2]],
+    
+    // 0: Pentadecathlon (period 15 oscillator) - vertical orientation
+    '0': [
+        [1, 2], [1, 3], [0, 4], [2, 4], [1, 5], [1, 6], [1, 7], [1, 8], [0, 9], [2, 9], [1, 10], [1, 11]
+    ]
+};
+
+function placePattern(patternKey, worldX, worldY) {
+    const pattern = patterns[patternKey];
+    if (!pattern) return;
+    
+    pattern.forEach(([dx, dy]) => {
+        aliveCells.add(cellKey(worldX + dx, worldY + dy));
+    });
 }
 
 function getNeighbors(x, y) {
@@ -159,6 +225,11 @@ const handlers = {
         canvas.style.cursor = 'grab';
     },
     onMouseMove(e) {
+        // Update last mouse position
+        let rect = canvas.getBoundingClientRect();
+        lastMouseX = e.clientX - rect.left;
+        lastMouseY = e.clientY - rect.top;
+        
         if (isDragging) {
             let dx = (e.clientX - dragStartX) / zoom;
             let dy = (e.clientY - dragStartY) / zoom;
@@ -210,6 +281,17 @@ const handlers = {
     onSpeedDownClick() {
         delay += 20;
         updateSpeedLabel();
+    },
+    onKeyDown(e) {
+        // Handle number keys 0-9
+        if (e.key >= '0' && e.key <= '9') {
+            // Calculate world coordinates from last mouse position
+            let wx = Math.floor(cameraX + lastMouseX / zoom);
+            let wy = Math.floor(cameraY + lastMouseY / zoom);
+            
+            placePattern(e.key, wx, wy);
+            drawGrid();
+        }
     }
 };
 
@@ -225,6 +307,7 @@ canvas.addEventListener('wheel', handlers.onWheel, { passive: false });
 pauseBtn.addEventListener('click', handlers.onPauseClick);
 speedUpBtn.addEventListener('click', handlers.onSpeedUpClick);
 speedDownBtn.addEventListener('click', handlers.onSpeedDownClick);
+window.addEventListener('keydown', handlers.onKeyDown);
 
 /* ====================================== Runtime ======================================== */
 resizeCanvas();
